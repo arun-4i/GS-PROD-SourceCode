@@ -1,0 +1,58 @@
+---
+description: Connection pooling and transaction management standards for node-oracledb backend development.
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Connection Pooling and Transaction Management
+
+This file defines connection pooling and transaction management standards for backend development using node-oracledb. For related database standards, see other files in the database folder.
+
+## Connection Pooling
+
+- Configure node-oracledb connection pool in config/database.ts
+- Example:
+
+```ts
+import oracledb from "oracledb";
+const pool = await oracledb.createPool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  connectString: process.env.DB_CONNECT_STRING,
+  poolMin: 0,
+  poolMax: 10,
+  poolIncrement: 1,
+});
+```
+
+## Transaction Management
+
+- Use transactions for multi-step DB operations
+- Example:
+
+```ts
+const connection = await pool.getConnection();
+try {
+  await connection.execute("BEGIN");
+  await connection.execute("INSERT INTO ...", bindVars1);
+  await connection.execute("UPDATE ...", bindVars2);
+  await connection.execute("COMMIT");
+} catch (err) {
+  await connection.execute("ROLLBACK");
+  throw err;
+} finally {
+  await connection.close();
+}
+```
+
+- For DB package calls, use bind variables for all parameters.
+- Always handle errors and roll back on failure.
+
+## Best Practices
+
+- Use transactions for all write operations that affect multiple tables.
+- Always use bind variables to prevent SQL injection.
+- Reference [rules/database/entities.mdc] for entity and DB package usage standards.
+
+---

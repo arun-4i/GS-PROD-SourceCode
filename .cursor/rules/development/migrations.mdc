@@ -1,0 +1,212 @@
+---
+description: Spring Boot to Node.js migration standards and error prevention
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Spring Boot to Node.js Migration Standards
+
+This file defines mandatory standards for Spring Boot to Node.js migrations based on lessons learned from Showroom module migration (31-07-25).
+
+## PRE-MIGRATION REQUIREMENTS (MANDATORY)
+
+### 1. Pattern Study Phase
+
+- **MUST** read existing Node.js patterns in codebase first:
+  - `userRouter.ts` - autoRegisterRoutes pattern
+  - `binTransferPackageRouter.ts` - router structure
+  - `database.ts` - connection patterns
+- **MUST** identify Oracle package methods in source Spring Boot code
+- **MUST** validate database permissions for all procedures
+
+### 2. Import Pattern Verification
+
+```typescript
+// CORRECT imports that MUST be used:
+import { OracleConnection } from "../config/database"; // NOT getOracleConnection
+import { autoRegisterRoutes } from "../utils/autoRegisterRoutes"; // MANDATORY for routes
+import { registry } from "../utils/swaggerRegistry"; // MANDATORY for Swagger
+import { z } from "zod"; // For validation schemas
+```
+
+### 3. Pre-Migration Checklist
+
+- [ ] Existing patterns studied and understood
+- [ ] Oracle procedures identified and access confirmed
+- [ ] Import patterns verified
+- [ ] .cursorrules and related rules reviewed
+- [ ] Migration plan created with phases
+
+## IMPLEMENTATION PHASES (SEQUENTIAL - NO SHORTCUTS)
+
+### Phase 1: Data Layer
+
+1. **Entity Creation** - TypeScript interfaces for all data structures
+2. **Repository Implementation** - Oracle package calls with proper error handling
+3. **Validation** - Complete repository testing before proceeding
+
+**GATE:** All repository methods must compile and have proper types before Phase 2
+
+### Phase 2: Business Layer
+
+1. **Service Implementation** - Business logic with transaction logging
+2. **Complexity Management** - Keep methods under 15 cognitive complexity
+3. **Error Handling** - Proper try-catch with structured responses
+
+**GATE:** All services must pass lint checks before Phase 3
+
+### Phase 3: API Layer
+
+1. **Controller Creation** - HTTP request/response handling
+2. **Router Configuration** - MUST use autoRegisterRoutes pattern
+3. **Swagger Integration** - Auto-generated documentation
+
+**GATE:** Full integration test and documentation review
+
+## CODE QUALITY REQUIREMENTS (ZERO TOLERANCE)
+
+### 1. Forbidden Patterns
+
+```typescript
+// ❌ FORBIDDEN - Will cause compilation errors
+import { getOracleConnection } from "../config/database";
+
+// ❌ FORBIDDEN - Violates .cursorrules
+console.log("debug message");
+console.error("error message");
+
+// ❌ FORBIDDEN - Manual route definitions
+router.post("/endpoint", middleware, controller.method);
+
+// ❌ FORBIDDEN - Naked any types without justification
+function process(data: any): any {}
+```
+
+### 2. Required Patterns
+
+```typescript
+// ✅ REQUIRED - Correct database import
+import { OracleConnection } from "../config/database";
+
+// ✅ REQUIRED - autoRegisterRoutes pattern
+autoRegisterRoutes(router, [...], registry);
+
+// ✅ REQUIRED - Proper typing
+function process(data: Record<string, any>): APIResponse { }
+
+// ✅ REQUIRED - Complexity management
+private extractComplexLogic(): ReturnType { } // Extract method pattern
+```
+
+### 3. Cognitive Complexity Management
+
+- **Maximum:** 15 per method
+- **Solution:** Extract Method pattern when approaching limit
+- **Example:**
+
+```typescript
+// Before: Complex method (18 complexity)
+private processResponse(result, key) {
+  if (result[key]) {
+    if (Array.isArray(result[key])) {
+      if (result[key].length > 0) {
+        // ... complex nested logic
+      }
+    }
+  }
+}
+
+// After: Extracted methods (<15 each)
+private processResponse(result, key) {
+  const data = this.extractValidData(result, key);
+  if (!data) return defaultResponse;
+  return this.formatResponse(data);
+}
+```
+
+## TESTING STRATEGY (CHECKPOINT VALIDATION)
+
+### 1. Component-Level Testing
+
+- **Repository:** Database connection and procedure calls
+- **Service:** Business logic and error handling
+- **Controller:** Request/response formatting
+- **Router:** Route registration and Swagger integration
+
+### 2. Quality Gates
+
+```bash
+# After each component completion:
+npm run lint                    # Must pass
+npm run type-check             # Must pass
+npm run test:unit              # Must pass for completed components
+```
+
+### 3. Integration Validation
+
+- All routes accessible via HTTP
+- Swagger documentation generated
+- Oracle procedures called successfully
+- Error responses structured correctly
+
+## ERROR PREVENTION CHECKLIST
+
+### Before Starting Migration
+
+- [ ] Existing patterns studied (userRouter.ts, etc.)
+- [ ] Database connection pattern confirmed (OracleConnection.getConnection)
+- [ ] autoRegisterRoutes pattern understood
+- [ ] Swagger registry pattern verified
+- [ ] .cursorrules reviewed for logging restrictions
+
+### During Each Phase
+
+- [ ] Lint check after major component completion
+- [ ] Type safety validation
+- [ ] No console.log statements added
+- [ ] Cognitive complexity monitored (<15)
+- [ ] Proper imports used
+
+### Before Completion
+
+- [ ] All routes use autoRegisterRoutes pattern
+- [ ] Complete Swagger documentation generated
+- [ ] No console.log/console.error statements
+- [ ] All TypeScript errors resolved
+- [ ] Integration test passes
+
+## VIOLATION CONSEQUENCES
+
+**Failure to follow these standards will result in:**
+
+- Import errors requiring extensive refactoring
+- Missing Swagger documentation
+- Lint failures requiring code restructuring
+- Cognitive complexity violations needing method extraction
+- Console.log pollution requiring cleanup
+- File corruption from bulk operations
+
+**These are the exact errors faced in Showroom migration - they are preventable with discipline.**
+
+## CONTINUOUS IMPROVEMENT
+
+### After Each Migration
+
+- Update this file with new lessons learned
+- Add specific error patterns to prevention checklist
+- Refine quality gates based on experience
+- Document new patterns discovered
+
+### Success Metrics
+
+- Zero import/configuration errors
+- First-pass lint success
+- Complete Swagger documentation
+- No code quality violations
+- Clean, maintainable architecture
+
+---
+
+**Last Updated:** 31-07-25 based on Showroom migration lessons learned
+**Next Review:** After next Spring Boot migration completion

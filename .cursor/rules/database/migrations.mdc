@@ -1,0 +1,19 @@
+---
+description: Migration and seeding policy for node-oracledb projects using externally managed Oracle schemas.
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Migration and Seeding Standards
+
+This project does not use ORM-based migrations or seeders. The Oracle database schema is managed externally (DBA or legacy system). No migration scripts should be written in Node.js. All tables, packages, and schema changes are handled outside the Node.js codebase.
+
+## Best Practices
+
+- Document any required schema changes in a dedicated changelog file if needed.
+- Coordinate with the DBA team for all schema changes.
+- Never attempt to modify the schema from application code.
+- For test data, use dedicated test schemas or environments managed by the DBA.
+
+---

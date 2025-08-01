@@ -1,0 +1,79 @@
+---
+description: Entity patterns, safe SQL, and Oracle DB package usage standards for node-oracledb backend development.
+globs:
+  - "**/*.entity.ts"
+  - "**/*.entity.js"
+alwaysApply: false
+---
+
+# Entity Patterns and DB Package Usage (node-oracledb)
+
+This file defines standards for representing database entities and using Oracle DB packages in backend development with node-oracledb. For related database standards, see other files in the database folder.
+
+## Entity Definition
+
+- Define entities as plain TypeScript classes or interfaces that map to existing Oracle tables.
+- Do not use any ORM or model decorators.
+- Example:
+
+```ts
+// src/entities/user.entity.ts
+export interface User {
+  USER_ID: number;
+  USER_NAME: string;
+  FULL_NAME: string;
+  EMAIL_ADDRESS: string;
+}
+```
+
+## Safe SQL and Bind Variables
+
+- Always use bind variables in all SQL queries to prevent SQL injection.
+- Example (insert):
+
+```ts
+const sql = `
+  INSERT INTO XXGS_WMS_USER (USER_ID, USER_NAME)
+  VALUES (:userId, :userName)
+`;
+await connection.execute(sql, { userId: 123, userName: "john_doe" });
+```
+
+## Using DB Packages for Validation and CRUD
+
+- Prefer calling Oracle DB packages for validation, business logic, and CRUD when available.
+- Example (call package procedure):
+
+```ts
+const sql = `
+  BEGIN
+    user_pkg.insert_user(:userId, :userName, :fullName, :emailAddress);
+  END;
+`;
+await connection.execute(sql, {
+  userId: user.USER_ID,
+  userName: user.USER_NAME,
+  fullName: user.FULL_NAME,
+  emailAddress: user.EMAIL_ADDRESS,
+});
+```
+
+## Naming Conventions
+
+- Table names: match existing Oracle schema (usually uppercase, snake_case)
+- Field names: match DB column names (uppercase, snake_case)
+- Entity file names: [resource].entity.ts
+
+## Best Practices
+
+- Keep all entity definitions in the entities/ directory
+- Use DB packages for validation and business logic whenever possible
+- Reference [rules/database/transactions.mdc] for transaction and connection pooling standards
+
+---
+
+description:
+globs:
+alwaysApply: false
+
+---

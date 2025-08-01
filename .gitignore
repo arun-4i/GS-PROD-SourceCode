@@ -1,0 +1,316 @@
+# ==========================================
+# GRANDSTORES PROJECT .GITIGNORE
+# Multi-technology project: Node.js + Spring Boot + Oracle
+# ==========================================
+
+# ==========================================
+# NODE.JS & NPM
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+.yarn-integrity
+.pnp
+.pnp.js
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Build outputs
+dist/
+build/
+out/
+
+# ==========================================
+# TYPESCRIPT
+# ==========================================
+*.tsbuildinfo
+.tscache/
+
+# ==========================================
+# JAVA & SPRING BOOT
+# ==========================================
+target/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Spring Boot
+.mvn/
+mvnw
+mvnw.cmd
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# Gradle
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# Class files
+*.class
+
+# ==========================================
+# DATABASE & ENVIRONMENT
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Oracle
+*.dbf
+*.log
+*.ctl
+*.dmp
+*.trc
+*.aud
+*.ora
+
+# Database backup files
+*.sql.bak
+*.backup
+*.dump
+
+# ==========================================
+# IDE & EDITOR FILES
+# ==========================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Cursor IDE (keep configuration but exclude cache)
+.cursor/cache/
+.cursor/logs/
+.cursor/temp/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ==========================================
+# OPERATING SYSTEM
+# ==========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ==========================================
+# LOGS & TEMPORARY FILES
+# ==========================================
+logs/
+*.log
+AllLogs_Files/
+resource_logs*
+application*.log
+spring*.log
+logback*.xml.tmp
+
+# Temporary directories
+temp/
+tmp/
+cache/
+.cache/
+.temp/
+
+# ==========================================
+# SECURITY & CREDENTIALS
+# ==========================================
+# API keys and secrets
+.env.secret
+secrets/
+credentials/
+keys/
+certs/
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.truststore
+
+# OAuth and JWT
+oauth.json
+jwt-*.json
+
+# ==========================================
+# BUILD & DEPLOYMENT
+# ==========================================
+# Docker
+.dockerignore.bak
+docker-compose.override.yml
+.docker/
+
+# Kubernetes
+*.kubeconfig
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ==========================================
+# TESTING
+# ==========================================
+# Test results
+test-results/
+coverage/
+.jest/
+jest.config.js.bak
+
+# E2E testing
+e2e/screenshots/
+e2e/videos/
+
+# ==========================================
+# PACKAGE MANAGERS
+# ==========================================
+# Lock files (keep yarn.lock but not package-lock.json for consistency)
+package-lock.json
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ==========================================
+# DOCUMENTATION BUILD
+# ==========================================
+docs/build/
+site/
+_site/
+
+# ==========================================
+# MISC TOOLS
+# ==========================================
+# ESLint cache
+.eslintcache
+
+# Prettier cache
+.prettiercache
+
+# Stylelint cache
+.stylelintcache
+
+# SonarQube
+.sonar/
+sonar-project.properties.bak
+
+# ==========================================
+# PROJECT SPECIFIC
+# ==========================================
+# Oracle connection files
+tnsnames.ora.bak
+wallet/
+
+# Spring Boot configuration backups
+application-*.properties.bak
+application-*.yml.bak
+
+# Custom exclude patterns
+*.local
+*.backup
+*.orig
+*.rej
+*.conflict
+
+# Archive files
+archive/
+backups/
+old/
+
+# ==========================================
+# KEEP THESE FILES (NEGATED PATTERNS)
+# ==========================================
+# Keep important config files
+!.cursor/.cursorrules
+!.cursor/rules/
+!.cursor/tasks/
+!.cursor/docs/
+
+# Keep README and documentation
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+
+# Keep essential config
+!tsconfig.json
+!package.json
+!.editorconfig
+!.prettierrc*
+!.eslintrc*
+
+# Keep Git files
+!.gitattributes
+!.gitkeep

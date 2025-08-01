@@ -1,0 +1,131 @@
+---
+description: Swagger/OpenAPI documentation standards using Zod schemas, globs field, and alwaysApply: false.
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Swagger/OpenAPI Documentation Standards
+
+This file defines Swagger/OpenAPI documentation standards for backend development. For related development standards, see other files in the development folder.
+
+## Zod Schema Integration
+
+- Use Zod schemas as the single source of truth for request/response validation
+- Auto-generate OpenAPI docs from Zod schemas
+- Example:
+
+```ts
+// Use zod-to-openapi or similar tool
+import { z } from 'zod';
+const userSchema = z.object({ ... });
+// Register schema for OpenAPI
+```
+
+## Auto-Discovery (MANDATORY Pattern)
+
+**ALL new routes MUST use autoRegisterRoutes pattern:**
+
+```typescript
+// REQUIRED imports
+import { autoRegisterRoutes } from "../utils/autoRegisterRoutes";
+import { registry } from "../utils/swaggerRegistry";
+import { END_POINTS } from "./end-points";
+
+// REQUIRED pattern - NO manual route definitions allowed
+autoRegisterRoutes(
+  router,
+  [
+    {
+      method: "post",
+      path: "/endpoint",
+      handler: controller.method,
+      schemas: {
+        body: validationSchema,
+        response: responseSchema,
+      },
+      summary: "Clear description",
+      tags: ["ModuleName"],
+      contentType: "application/json",
+    },
+  ],
+  registry, // MANDATORY parameter
+  END_POINTS.MODULE_NAME // CRITICAL: Use END_POINTS constant, NOT hardcoded strings
+);
+```
+
+**CRITICAL REQUIREMENT - Router Mount Path:**
+
+- **ALWAYS** pass the router's mount path as the 4th parameter to `autoRegisterRoutes`
+- **MUST** use END_POINTS constants, NOT hardcoded strings
+- This ensures Swagger documentation shows correct full URLs
+- Mount path MUST match the path used in `routes/index.ts` where router is mounted
+- Single source of truth for all endpoint paths in `routes/end-points.ts`
+
+**Mount Path Examples (CORRECT - Using END_POINTS):**
+
+```typescript
+// userRouter.ts
+autoRegisterRoutes(userRouter, routes, registry, END_POINTS.USER);
+
+// binTransferTrackRouter.ts
+autoRegisterRoutes(
+  binTransferTrackRouter,
+  routes,
+  registry,
+  END_POINTS.BIN_TRANSFER_TRACK
+);
+
+// showroomRouter.ts
+autoRegisterRoutes(showroomRouter, routes, registry, END_POINTS.SHOWROOM);
+
+// moConfirmRouter.ts
+autoRegisterRoutes(moConfirmRouter, routes, registry, END_POINTS.MO_CONFIRM);
+```
+
+**FORBIDDEN Examples:**
+
+```typescript
+// DON'T DO THIS - Hardcoded strings
+autoRegisterRoutes(router, routes, registry, "/newuser");
+autoRegisterRoutes(router, routes, registry, "/bintransfer");
+```
+
+**FORBIDDEN:** Manual route definitions like `router.post("/path", handler)`
+
+## Documentation Best Practices
+
+- Include request/response examples
+- Document all endpoints, parameters, and error responses
+- Use tags, summaries, and versioning
+
+## Troubleshooting Swagger URL Issues
+
+**Symptom:** Swagger shows incomplete URLs (e.g., `/module/getuser` instead of `/module/newuser/getuser`)
+
+**Cause:** Missing or incorrect router mount path in `autoRegisterRoutes` call
+
+**Solution:**
+
+1. Check `routes/end-points.ts` for the correct mount path
+2. Verify router mounting in `routes/index.ts` (e.g., `router.use(END_POINTS.USER, userRouter)`)
+3. Ensure `autoRegisterRoutes` includes the mount path as 4th parameter using END_POINTS constant
+4. Import END_POINTS: `import { END_POINTS } from "./end-points";`
+5. Use correct constant: `autoRegisterRoutes(router, routes, registry, END_POINTS.MODULE_NAME)`
+6. Restart server to regenerate Swagger documentation
+
+**Verification:**
+
+- Test API endpoint manually to confirm it works at the expected full URL
+- Check Swagger documentation matches the working URL
+- Ensure all router paths are relative (start with `/`) not absolute
+
+## Compliance
+
+- Ensure docs are accessible at /api-docs
+- Reference [rules/security/validation.mdc] for schema standards
+  description:
+  globs:
+  alwaysApply: false
+
+---

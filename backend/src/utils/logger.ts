@@ -5,14 +5,7 @@ import path from "path";
 import fs from "fs";
 import { config } from "@config/env";
 
-export type LogLabel =
-  | "db"
-  | "userAction"
-  | "auth"
-  | "api"
-  | "system"
-  | "binTransferAction"
-  | "binTransferTrackAction";
+export type LogLabel = "db" | "userAction" | "auth" | "api" | "system";
 
 export interface LogMeta {
   [key: string]: any;

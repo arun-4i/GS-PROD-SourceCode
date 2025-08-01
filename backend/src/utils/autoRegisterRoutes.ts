@@ -134,7 +134,8 @@ export function autoRegisterRoutes(
   basePath?: string
 ): void {
   for (const route of routes) {
-    const routeKey = `${route.method.toUpperCase()} ${route.path}`;
+    const fullPath = basePath ? `${basePath}${route.path}` : route.path;
+    const routeKey = `${route.method.toUpperCase()} ${fullPath}`;
     if (registeredRoutes.has(routeKey)) {
       console.warn(
         `[autoRegisterRoutes] Duplicate route detected: ${routeKey}`

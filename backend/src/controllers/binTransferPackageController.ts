@@ -16,7 +16,7 @@ export class BinTransferPackageController {
   public getItemDetail = asyncHandler(async (req: Request, res: Response) => {
     const parsed = oraclePackageParamsSchema.safeParse(req.body);
     if (!parsed.success) {
-      logger.warn("binTransferAction", "Validation failed for getItemDetail", {
+      logger.warn("userAction", "Validation failed for getItemDetail", {
         errors: parsed.error.errors,
       });
       return res.status(400).json({
@@ -34,13 +34,9 @@ export class BinTransferPackageController {
   public getItemCrossref = asyncHandler(async (req: Request, res: Response) => {
     const parsed = oraclePackageParamsSchema.safeParse(req.body);
     if (!parsed.success) {
-      logger.warn(
-        "binTransferAction",
-        "Validation failed for getItemCrossref",
-        {
-          errors: parsed.error.errors,
-        }
-      );
+      logger.warn("userAction", "Validation failed for getItemCrossref", {
+        errors: parsed.error.errors,
+      });
       return res.status(400).json({
         success: false,
         message: "Validation error",
@@ -62,7 +58,7 @@ export class BinTransferPackageController {
   public insertIOConLot = asyncHandler(async (req: Request, res: Response) => {
     const parsed = ioConLotCreateSchema.array().safeParse(req.body);
     if (!parsed.success) {
-      logger.warn("binTransferAction", "Validation failed for insertIOConLot", {
+      logger.warn("userAction", "Validation failed for insertIOConLot", {
         errors: parsed.error.errors,
       });
       return res.status(400).json({
@@ -94,7 +90,7 @@ export class BinTransferPackageController {
       const parsed = invCountConfirmCreateSchema.array().safeParse(req.body);
       if (!parsed.success) {
         logger.warn(
-          "binTransferAction",
+          "userAction",
           "Validation failed for insertInvCountConfirm",
           {
             errors: parsed.error.errors,

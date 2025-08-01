@@ -28,7 +28,7 @@ export class BinTransferTrackController {
         .safeParse(req.body);
       if (!parsed.success) {
         logger.warn(
-          "binTransferTrackAction",
+          "userAction",
           "Validation failed for insertBinTransferHdr",
           {
             errors: parsed.error.errors,
@@ -64,7 +64,7 @@ export class BinTransferTrackController {
         .safeParse(req.body);
       if (!parsed.success) {
         logger.warn(
-          "binTransferTrackAction",
+          "userAction",
           "Validation failed for insertBinTransferLns",
           {
             errors: parsed.error.errors,
@@ -100,7 +100,7 @@ export class BinTransferTrackController {
         .safeParse(req.body);
       if (!parsed.success) {
         logger.warn(
-          "binTransferTrackAction",
+          "userAction",
           "Validation failed for insertBinTransferDrop",
           {
             errors: parsed.error.errors,
@@ -143,13 +143,9 @@ export class BinTransferTrackController {
     async (req: Request, res: Response) => {
       const parsed = oraclePackageParamsSchema.safeParse(req.body);
       if (!parsed.success) {
-        logger.warn(
-          "binTransferTrackAction",
-          "Validation failed for binTransferDropHdr",
-          {
-            errors: parsed.error.errors,
-          }
-        );
+        logger.warn("userAction", "Validation failed for binTransferDropHdr", {
+          errors: parsed.error.errors,
+        });
         return res.status(400).json({
           success: false,
           message: "Validation error",
@@ -169,13 +165,9 @@ export class BinTransferTrackController {
     async (req: Request, res: Response) => {
       const parsed = oraclePackageParamsSchema.safeParse(req.body);
       if (!parsed.success) {
-        logger.warn(
-          "binTransferTrackAction",
-          "Validation failed for binTransferDropDtl",
-          {
-            errors: parsed.error.errors,
-          }
-        );
+        logger.warn("userAction", "Validation failed for binTransferDropDtl", {
+          errors: parsed.error.errors,
+        });
         return res.status(400).json({
           success: false,
           message: "Validation error",
@@ -194,13 +186,9 @@ export class BinTransferTrackController {
   public getBinNumber = asyncHandler(async (req: Request, res: Response) => {
     const parsed = oraclePackageParamsSchema.safeParse(req.body);
     if (!parsed.success) {
-      logger.warn(
-        "binTransferTrackAction",
-        "Validation failed for getBinNumber",
-        {
-          errors: parsed.error.errors,
-        }
-      );
+      logger.warn("userAction", "Validation failed for getBinNumber", {
+        errors: parsed.error.errors,
+      });
       return res.status(400).json({
         success: false,
         message: "Validation error",
@@ -216,13 +204,9 @@ export class BinTransferTrackController {
   public insertQuickDrop = asyncHandler(async (req: Request, res: Response) => {
     const parsed = quickDropCreateSchema.safeParse(req.body);
     if (!parsed.success) {
-      logger.warn(
-        "binTransferTrackAction",
-        "Validation failed for insertQuickDrop",
-        {
-          errors: parsed.error.errors,
-        }
-      );
+      logger.warn("userAction", "Validation failed for insertQuickDrop", {
+        errors: parsed.error.errors,
+      });
       return res.status(400).json({
         success: false,
         message: "Validation error",

@@ -162,15 +162,15 @@ Complete analysis of all routes in the Spring Boot project organized by folder s
 **Location:** `src/main/java/com/mobile/integration/grandstores/RMAReceipt/RMAReceiptController/`
 **Routes Found:**
 
-1. `/module/rmadelivery/getrmadelreceiptnum` - POST
-2. `/module/rmadelivery/getrmadelordernum` - POST
-3. `/module/rmadelivery/getrmadelitemdtl` - POST
-4. `/module/rmadelivery/getrmadelitemcross` - POST
-5. `/module/rmareceipt/getrmadetail` - POST
-6. `/module/rmareceipt/rmacustdetails` - POST
-7. `/module/rmareceipt/rmaitemdetail` - POST
-8. `/module/rmareceipt/rmaitemcrossRef` - POST
-9. `/module/rmareceipt/getbundle` - POST
+1. `/module/rmadelivery/getrmadelreceiptnum` - POST@
+2. `/module/rmadelivery/getrmadelordernum` - POST@
+3. `/module/rmadelivery/getrmadelitemdtl` - POST@
+4. `/module/rmadelivery/getrmadelitemcross` - POST@
+5. `/module/rmareceipt/getrmadetail` - POST@
+6. `/module/rmareceipt/rmacustdetails` - POST@
+7. `/module/rmareceipt/rmaitemdetail` - POST@
+8. `/module/rmareceipt/rmaitemcrossRef` - POST@
+9. `/module/rmareceipt/getbundle` - POST@
 
 **Route Count: 9**
 

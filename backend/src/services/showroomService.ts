@@ -5,6 +5,10 @@
  */
 
 import {
+  createErrorResponse,
+  createSuccessResponse,
+} from "../validators/common";
+import {
   APIResponse,
   OraclePackageResponse,
   MobTransLogEntity,
@@ -167,19 +171,11 @@ export class ShowroomService {
       // Update transaction log with response
       this.updateTransactionLogResponse(mobTransLog, result);
 
-      // Return API response matching Spring Boot structure
-      return {
-        data: result,
-        status: 200,
-        success: true,
-      };
+      // REFACTORED: Uses centralized response utility
+      return createSuccessResponse(result);
     } catch (error) {
       console.error("Error in getInvOrg service:", error);
-      return {
-        error: error instanceof Error ? error.message : "Unknown error",
-        status: 500,
-        success: false,
-      };
+      return createErrorResponse(500, "Error in getInvOrg service", error);
     }
   }
 

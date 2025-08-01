@@ -6,15 +6,16 @@
 
 import { Request, Response, NextFunction } from "express";
 import { MoConfirmService } from "../services/moConfirmService";
+import { APIResponse } from "../entities/moConfirm.entity";
 import {
-  APIResponse,
-  MoConfirmEntity,
-  PickConfirmEntity,
-  MoPickConfirmWrapper,
-} from "../entities/moConfirm.entity";
+  createControllerHandler,
+  validateArrayBody,
+  validateWrapperBody,
+  createGetHandler,
+} from "../utils/controllerHelpers";
 
 export class MoConfirmController {
-  private moConfirmService: MoConfirmService;
+  private readonly moConfirmService: MoConfirmService;
 
   constructor() {
     this.moConfirmService = new MoConfirmService();
@@ -28,42 +29,23 @@ export class MoConfirmController {
    * Insert MO confirmations with duplicate filtering
    * Route: POST /module/mo/confirm/insertmo
    * Migrated from MoConfirmCO.insertMoConfirm method
+   * USES centralized controller handler for consistency
    */
-  insertMoConfirm = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const entities: MoConfirmEntity[] = req.body as MoConfirmEntity[];
-      const result: APIResponse =
-        await this.moConfirmService.insertMoConfirmations(entities);
-
-      // Return result with appropriate status
-      res.status(result.status).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  insertMoConfirm = createControllerHandler(
+    (entities: unknown) =>
+      this.moConfirmService.insertMoConfirmations(entities as any),
+    (body) => validateArrayBody(body, "MO confirmations")
+  );
 
   /**
    * Get all MO confirmations
    * Route: GET /module/mo/confirm/getallmo
    * Migrated from MoConfirmCO.getBinTransfer method
+   * USES centralized GET handler for consistent handling
    */
-  getAllMoConfirmations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const result: APIResponse =
-        await this.moConfirmService.getAllMoConfirmations();
-      res.status(200).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  getAllMoConfirmations = createGetHandler(() =>
+    this.moConfirmService.getAllMoConfirmations()
+  );
 
   // =====================================================
   // PICK CONFIRMATION OPERATIONS
@@ -73,47 +55,23 @@ export class MoConfirmController {
    * Insert pick confirmations with complex logic
    * Route: POST /module/mo/confirm/insertpick
    * Migrated from MoConfirmCO.insertPickConfirm method
+   * USES centralized controller handler for consistency
    */
-  insertPickConfirm = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const entities: PickConfirmEntity[] = req.body as PickConfirmEntity[];
-      const result: APIResponse =
-        await this.moConfirmService.insertPickConfirmations(entities);
-
-      // Handle null response case (matching Spring Boot logic)
-      if (!result.data && result.status === 200 && result.data?.length === 0) {
-        res.status(204).send(); // No content
-        return;
-      }
-
-      res.status(result.status).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  insertPickConfirm = createControllerHandler(
+    (entities: unknown) =>
+      this.moConfirmService.insertPickConfirmations(entities as any),
+    (body) => validateArrayBody(body, "Pick confirmations")
+  );
 
   /**
    * Get all pick confirmations
    * Route: GET /module/mo/confirm/getallpick
    * Migrated from MoConfirmCO.getPickConfirm method
+   * USES centralized GET handler for consistent handling
    */
-  getAllPickConfirmations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const result: APIResponse =
-        await this.moConfirmService.getAllPickConfirmations();
-      res.status(200).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  getAllPickConfirmations = createGetHandler(() =>
+    this.moConfirmService.getAllPickConfirmations()
+  );
 
   // =====================================================
   // ORACLE PACKAGE OPERATIONS
@@ -152,23 +110,13 @@ export class MoConfirmController {
    * Combined MO & Pick confirmation with cross-validation
    * Route: POST /module/mo/confirm/insertmopick
    * Migrated from MoConfirmCO.insertBothMoPick method
+   * USES centralized wrapper handler for consistency
    */
-  insertMoPickConfirmations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const wrapper: MoPickConfirmWrapper = req.body as MoPickConfirmWrapper;
-      const result: APIResponse =
-        await this.moConfirmService.insertCombinedMoPick(wrapper);
-
-      // Always return 200 with result data (matching Spring Boot ResponseEntity.ok().body(api))
-      res.status(200).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  insertMoPickConfirmations = createControllerHandler(
+    (wrapper: unknown) =>
+      this.moConfirmService.insertCombinedMoPick(wrapper as any),
+    (body) => validateWrapperBody(body, ["moConfirm", "pickConfirm"])
+  );
 }
 
 // Export controller instance for use in routes

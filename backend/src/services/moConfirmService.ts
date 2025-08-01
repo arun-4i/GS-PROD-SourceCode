@@ -9,14 +9,18 @@ import {
   PickConfirmEntity,
   MoPickConfirmWrapper,
   APIResponse,
-  MobTransLogEntity,
 } from "../entities/moConfirm.entity";
 import { MoConfirmRepository } from "../repositories/moConfirmRepo";
+import { createFailedRecordLog } from "../utils/transactionLogger";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+} from "../validators/common";
 import { PickConfirmRepository } from "../repositories/pickConfirmRepo";
 
 export class MoConfirmService {
-  private moConfirmRepo: MoConfirmRepository;
-  private pickConfirmRepo: PickConfirmRepository;
+  private readonly moConfirmRepo: MoConfirmRepository;
+  private readonly pickConfirmRepo: PickConfirmRepository;
 
   constructor() {
     this.moConfirmRepo = new MoConfirmRepository();
@@ -24,23 +28,11 @@ export class MoConfirmService {
   }
 
   // =====================================================
-  // TRANSACTION LOGGING UTILITIES
+  // TRANSACTION LOGGING UTILITIES (REUSED FROM COMMON)
   // =====================================================
 
-  /**
-   * Create transaction log entry for failed duplicate records
-   * Migrated from MoConfirmCO.java mobTransLog creation pattern
-   */
-  private createFailedRecordLog(
-    moduleName: string,
-    attributeCategory: string
-  ): MobTransLogEntity {
-    return {
-      MODULE_NAME: moduleName,
-      PROCESSED_TIME: new Date(),
-      REQUEST: attributeCategory, // Using attributeCategory to store combination key
-    };
-  }
+  // Transaction logging now handled by common utilities
+  // createTransactionLog, updateTransactionLogResponse, and createFailedRecordLog imported from utils
 
   // =====================================================
   // MO CONFIRMATION OPERATIONS
@@ -97,7 +89,7 @@ export class MoConfirmService {
     }
 
     // Duplicate found - log failed record
-    this.createFailedRecordLog("moConfirm", combination);
+    createFailedRecordLog("moConfirm", combination);
     return { shouldAdd: false, combination };
   }
 
@@ -110,18 +102,10 @@ export class MoConfirmService {
     if (entities.length > 0) {
       const result = await this.moConfirmRepo.insertMoConfirmations(entities);
 
-      return {
-        data: result,
-        status: 200,
-        success: true,
-      };
+      return createSuccessResponse(result);
     }
 
-    return {
-      data: [],
-      status: 200,
-      success: true,
-    };
+    return createSuccessResponse([]);
   }
 
   /**
@@ -132,17 +116,9 @@ export class MoConfirmService {
     try {
       const result = await this.moConfirmRepo.findAllMoConfirmations();
 
-      return {
-        data: result,
-        status: 200,
-        success: true,
-      };
+      return createSuccessResponse(result);
     } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : "Unknown error",
-        status: 500,
-        success: false,
-      };
+      return createErrorResponse(500, "Error in getAllMoConfirmations", error);
     }
   }
 
@@ -221,7 +197,7 @@ export class MoConfirmService {
       return { shouldAdd: true, combination };
     }
 
-    this.createFailedRecordLog("poConfirm", combination);
+    createFailedRecordLog("poConfirm", combination);
     return { shouldAdd: false, combination };
   }
 
@@ -249,7 +225,7 @@ export class MoConfirmService {
       return { shouldAdd: true, combination };
     }
 
-    this.createFailedRecordLog("poConfirm", combination);
+    createFailedRecordLog("poConfirm", combination);
     return { shouldAdd: false, combination };
   }
 
@@ -263,18 +239,10 @@ export class MoConfirmService {
       const result =
         await this.pickConfirmRepo.insertPickConfirmations(entities);
 
-      return {
-        data: result,
-        status: 200,
-        success: true,
-      };
+      return createSuccessResponse(result);
     }
 
-    return {
-      data: [],
-      status: 200,
-      success: true,
-    };
+    return createSuccessResponse([]);
   }
 
   /**
@@ -285,17 +253,13 @@ export class MoConfirmService {
     try {
       const result = await this.pickConfirmRepo.findAllPickConfirmations();
 
-      return {
-        data: result,
-        status: 200,
-        success: true,
-      };
+      return createSuccessResponse(result);
     } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : "Unknown error",
-        status: 500,
-        success: false,
-      };
+      return createErrorResponse(
+        500,
+        "Error in getAllPickConfirmations",
+        error
+      );
     }
   }
 
@@ -314,29 +278,30 @@ export class MoConfirmService {
 
       return this.parseOraclePackageResponse(packageResult);
     } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : "Unknown error",
-        status: 500,
-        success: false,
-      };
+      return createErrorResponse(500, "Error in processQuickPickJson", error);
     }
   }
 
   /**
    * Parse Oracle package response (extracted for complexity reduction)
    */
-  private parseOraclePackageResponse(packageResult: any): APIResponse {
+  private parseOraclePackageResponse(packageResult: unknown): APIResponse {
     const api: APIResponse = {
       data: packageResult,
       status: 200,
       success: true,
     };
 
+    // Cast to expected Oracle package response type
+    const typedResult = packageResult as { P_MES?: any; P_MES2?: any };
+
     let co = 0;
-    const responses = [packageResult.P_MES, packageResult.P_MES2];
+    const responses = [typedResult.P_MES, typedResult.P_MES2];
 
     for (const entry of responses) {
-      if (!entry) continue;
+      if (!entry) {
+        continue;
+      }
 
       const value = entry.toString();
       co++;
@@ -449,7 +414,7 @@ export class MoConfirmService {
         listFromIterator.push(current);
         myList.push(processResult.combination);
       } else {
-        this.createFailedRecordLog("moQuickConfirm", processResult.combination);
+        createFailedRecordLog("moQuickConfirm", processResult.combination);
       }
     }
 
@@ -484,7 +449,7 @@ export class MoConfirmService {
         poListFromIterator.push(poCurrent);
         myPoList.push(processResult.combination);
       } else {
-        this.createFailedRecordLog("poQuickConfirm", processResult.combination);
+        createFailedRecordLog("poQuickConfirm", processResult.combination);
       }
     }
 

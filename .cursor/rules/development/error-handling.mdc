@@ -43,19 +43,36 @@ class ValidationError extends Error {
 }
 ```
 
-## Error Response Format
+## MANDATORY: SSOT Response Utilities
 
-- Always return structured error responses:
+All services MUST use centralized response utilities:
 
-```json
-{
-  "success": false,
-  "message": "Error message",
-  "error": {
-    "code": "ERROR_CODE",
-    "details": {}
-  }
-}
+```ts
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createValidationErrorResponse,
+} from "../validators/common";
+
+// Success responses
+return createSuccessResponse(data);
+
+// Error responses
+return createErrorResponse(500, "Error message", error);
+
+// Validation errors
+return createValidationErrorResponse(validationErrors);
+```
+
+**Legacy Manual Pattern (DO NOT USE):**
+
+```ts
+// DEPRECATED - Do not manually create response objects
+return {
+  success: false,
+  message: "Error message",
+  error: { code: "ERROR_CODE" },
+};
 ```
 
 ## Compliance

@@ -13,14 +13,85 @@ This file defines Swagger/OpenAPI documentation standards for backend developmen
 
 - Use Zod schemas as the single source of truth for request/response validation
 - Auto-generate OpenAPI docs from Zod schemas
-- Example:
+- **MANDATORY:** Use common response schemas from `validators/common.ts`
 
-```ts
-// Use zod-to-openapi or similar tool
-import { z } from 'zod';
-const userSchema = z.object({ ... });
-// Register schema for OpenAPI
+### Required Common Schemas
+
+```typescript
+// MANDATORY imports for all routers
+import { apiResponseSchema } from "../validators/common";
+
+// Standard API Response (REQUIRED for all endpoints)
+const apiResponseSchema = z.object({
+  data: z.any().optional(),
+  status: z.number(),
+  error: z.string().optional(),
+  success: z.boolean().optional(),
+});
 ```
+
+### Schema Usage Requirements
+
+```typescript
+// CORRECT - Use common response schema
+{
+  method: "post",
+  path: "/endpoint",
+  handler: controller.method,
+  schemas: {
+    body: requestSchema,
+    response: apiResponseSchema, // MANDATORY - Use common schema
+  },
+  summary: "Clear description",
+  tags: ["ModuleName"],
+}
+
+// FORBIDDEN - Inline response schemas
+{
+  schemas: {
+    response: z.object({
+      data: z.any(),
+      status: z.number(),
+      // ... DON'T DO THIS
+    }),
+  },
+}
+```
+
+### Common Validation Helpers
+
+```typescript
+// MANDATORY imports for request schemas
+import {
+  optionalString,
+  optionalNumber,
+  optionalDate,
+  requiredString,
+  requiredNumber,
+} from "../validators/common";
+
+// CORRECT - Use common helpers
+const entitySchema = z.object({
+  id: optionalNumber,
+  name: requiredString,
+  description: optionalString,
+  createdDate: optionalDate,
+});
+
+// FORBIDDEN - Duplicate validation logic
+const entitySchema = z.object({
+  id: z.number().optional().nullable(), // DON'T DO THIS
+  name: z.string().min(1, "Field is required"), // DON'T DO THIS
+  // ... Use common helpers instead
+});
+```
+
+### DRY Principle Compliance
+
+- **MANDATORY:** All routers MUST import `apiResponseSchema` from `validators/common.ts`
+- **FORBIDDEN:** Defining inline response schemas in router files
+- **REQUIRED:** Use common validation helpers for consistent field validation
+- **SINGLE SOURCE:** All response schemas defined in `validators/common.ts`
 
 ## Auto-Discovery (MANDATORY Pattern)
 
@@ -31,6 +102,7 @@ const userSchema = z.object({ ... });
 import { autoRegisterRoutes } from "../utils/autoRegisterRoutes";
 import { registry } from "../utils/swaggerRegistry";
 import { END_POINTS } from "./end-points";
+import { apiResponseSchema } from "../validators/common"; // MANDATORY
 
 // REQUIRED pattern - NO manual route definitions allowed
 autoRegisterRoutes(
@@ -42,7 +114,7 @@ autoRegisterRoutes(
       handler: controller.method,
       schemas: {
         body: validationSchema,
-        response: responseSchema,
+        response: apiResponseSchema, // MANDATORY - Use common schema
       },
       summary: "Clear description",
       tags: ["ModuleName"],

@@ -7,7 +7,7 @@ import {
   createUserSchema,
   createUserRespGroupSchema,
 } from "../validators/userValidator";
-import { z } from "zod";
+import { apiResponseSchema } from "../validators/common";
 import { END_POINTS } from "./end-points";
 
 export const userRouter = Router();
@@ -21,10 +21,7 @@ autoRegisterRoutes(
       handler: userController.createUser,
       schemas: {
         body: createUserSchema.array(),
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Bulk insert users",
       tags: ["User"],
@@ -35,10 +32,7 @@ autoRegisterRoutes(
       path: "/getuser",
       handler: userController.getAllUsers,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get all users",
       tags: ["User"],
@@ -50,10 +44,7 @@ autoRegisterRoutes(
       handler: userRespGroupController.createUserRespGroup,
       schemas: {
         body: createUserRespGroupSchema.array(),
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Bulk insert user responsible groups",
       tags: ["UserRespGroup"],
@@ -64,10 +55,7 @@ autoRegisterRoutes(
       path: "/getuserrepo",
       handler: userRespGroupController.getAllUserRespGroups,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get all user responsible groups",
       tags: ["UserRespGroup"],
@@ -77,10 +65,7 @@ autoRegisterRoutes(
       path: "/getuserreponame",
       handler: userRespGroupController.getUserRepoName,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get user responsibility name",
       tags: ["UserRespGroup"],
@@ -91,10 +76,7 @@ autoRegisterRoutes(
       path: "/getuserrepoaccess",
       handler: userRespGroupController.getUserRepoAccess,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get user repo access",
       tags: ["UserRespGroup"],
@@ -105,10 +87,7 @@ autoRegisterRoutes(
       path: "/getuserrep",
       handler: userRespGroupController.getUserRep,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get user rep",
       tags: ["UserRespGroup"],
@@ -119,10 +98,7 @@ autoRegisterRoutes(
       path: "/getorg",
       handler: userRespGroupController.getOrg,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get organization",
       tags: ["UserRespGroup"],
@@ -133,10 +109,7 @@ autoRegisterRoutes(
       path: "/getuserrepactive",
       handler: userRespGroupController.getUserRepActive,
       schemas: {
-        response: z.object({
-          success: z.literal(true),
-          data: z.any(),
-        }),
+        response: apiResponseSchema,
       },
       summary: "Get active user rep",
       tags: ["UserRespGroup"],

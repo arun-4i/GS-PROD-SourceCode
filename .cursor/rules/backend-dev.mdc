@@ -20,8 +20,18 @@ This file provides a high-level overview of backend development for this project
 - Security, performance, and maintainability are top priorities
 - Follow clean architecture: separation of concerns between controllers, services, repositories
 - Use TypeScript, Express, and node-oracledb (with Oracle DB packages) as the core stack
+- **MANDATORY: Use Single Source of Truth (SSOT) utilities for all new code**
 - All new features and refactors must start with a detailed, tickable plan (see [rules/workflow.mdc])
-- Retrospective & feedback required after implementation (see [rules/workflow.mdc])
+
+## SSOT Utilities (MANDATORY)
+
+All new backend code MUST use these centralized utilities:
+
+- **Database**: `withDatabaseConnection()` from `utils/databaseWrapper.ts`
+- **Responses**: `createSuccessResponse()`, `createErrorResponse()` from `validators/common.ts`
+- **Controllers**: `createControllerHandler()`, `createGetHandler()` from `utils/controllerHelpers.ts`
+- **Validation**: Common schemas from `validators/common.ts` (apiResponseSchema, optionalString, etc.)
+- **Oracle**: `executeCountQuery()`, `getNextSequenceValue()` from `utils/oracleHelpers.ts`
 
 ## Modular Rules
 

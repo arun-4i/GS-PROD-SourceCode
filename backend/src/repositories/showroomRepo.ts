@@ -6,6 +6,7 @@
 
 import oracledb from "oracledb";
 import { OracleConnection } from "../config/database";
+import { withDatabaseConnection } from "../utils/databaseWrapper";
 import {
   OraclePackageResponse,
   GetInvOrgRequest,
@@ -42,13 +43,10 @@ export class ShowroomRepository {
   /**
    * GET_INV_ORG Oracle package call
    * Matches: showroompkg.GET_INV_ORG(P_USER_ID, P_ORGANIZATION_CODE, P_ORGANIZATION_NAME)
+   * REFACTORED: Uses centralized database wrapper for connection management
    */
   async getInvOrg(params: GetInvOrgRequest): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -68,33 +66,18 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getInvOrg: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "getInvOrg");
   }
 
   /**
    * GET_PHYSICAL_INVENTORIES Oracle package call
    * Matches: showroompkg.GET_PHYSICAL_INVENTORIES(P_INVENTORY_ORG_ID)
    */
+  // REFACTORED: Uses centralized database wrapper
   async getPhysicalInventories(
     params: GetPhysicalInventoriesRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -112,33 +95,18 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPhysicalInventories: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "getPhysicalInventories");
   }
 
   /**
    * GET_PHY_INV_SUBINV_DTLS Oracle package call
    * Matches: showroompkg.GET_PHY_INV_SUBINV_DTLS(P_INVENTORY_ORG_ID, P_PHYSICAL_INVENTORY_ID)
    */
+  // REFACTORED: Uses centralized database wrapper
   async getPhyInvSubInvDtls(
     params: GetPhyInvSubInvDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -157,19 +125,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPhyInvSubInvDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "getPhyInvSubInvDtls");
   }
 
   // =====================================================
@@ -183,11 +139,7 @@ export class ShowroomRepository {
   async getSaleOrderNum(
     params: GetSaleOrderNumRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -206,33 +158,18 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getSaleOrderNum: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "getSaleOrderNum");
   }
 
   /**
    * GET_SALE_ORDER_DETAILS Oracle package call
    * Matches: showroompkg.GET_SALE_ORDER_DETAILS(P_INVENTORY_ORG_ID, P_ORDER_NUM, P_MO_NUM, P_PICKSLIP_NUM, P_RESOURCE_ID)
    */
+  // REFACTORED: Uses centralized database wrapper
   async getSaleOrderDetails(
     params: GetSaleOrderDetailsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -254,19 +191,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getSaleOrderDetails: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getSaleOrderDetails");
   }
 
   /**
@@ -276,11 +201,7 @@ export class ShowroomRepository {
   async getSaleOrderDetailsCr(
     params: GetSaleOrderDetailsCrRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -302,19 +223,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getSaleOrderDetailsCr: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getSaleOrderDetailsCr");
   }
 
   // =====================================================
@@ -328,11 +237,7 @@ export class ShowroomRepository {
   async getMoDetails(
     params: GetMoDetailsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -352,19 +257,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getMoDetails: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getMoDetails");
   }
 
   /**
@@ -374,11 +267,7 @@ export class ShowroomRepository {
   async getMoItemDetails(
     params: GetMoItemDetailsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -396,19 +285,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getMoItemDetails: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getMoItemDetails");
   }
 
   /**
@@ -418,11 +295,7 @@ export class ShowroomRepository {
   async getMoItemCrossRefDtls(
     params: GetMoItemCrossRefDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -440,19 +313,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getMoItemCrossRefDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getMoItemCrossRefDtls");
   }
 
   // =====================================================
@@ -466,11 +327,7 @@ export class ShowroomRepository {
   async getPoNumber(
     params: GetPoNumberRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -489,19 +346,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPoNumber: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPoNumber");
   }
 
   /**
@@ -512,11 +357,7 @@ export class ShowroomRepository {
   async getReleaseNumber(
     params: GetReleaseNumberRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -534,19 +375,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getReleaseNumber: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getReleaseNumber");
   }
 
   /**
@@ -556,11 +385,7 @@ export class ShowroomRepository {
   async getPoItemDtls(
     params: GetPoItemDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -579,19 +404,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPoItemDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPoItemDtls");
   }
 
   /**
@@ -601,11 +414,7 @@ export class ShowroomRepository {
   async getPoItemCrossRef(
     params: GetPoItemCrossRefRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -624,19 +433,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPoItemCrossRef: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPoItemCrossRef");
   }
 
   // =====================================================
@@ -650,11 +447,7 @@ export class ShowroomRepository {
   async getRTVRequestNum(
     params: GetRTVRequestNumRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -675,19 +468,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getRTVRequestNum: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getRTVRequestNum");
   }
 
   /**
@@ -697,11 +478,7 @@ export class ShowroomRepository {
   async getRTVPoNum(
     params: GetRTVPoNumRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -721,19 +498,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getRTVPoNum: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getRTVPoNum");
   }
 
   /**
@@ -743,11 +508,7 @@ export class ShowroomRepository {
   async getRTVItemDtls(
     params: GetRTVItemDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -768,19 +529,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getRTVItemDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getRTVItemDtls");
   }
 
   /**
@@ -790,11 +539,7 @@ export class ShowroomRepository {
   async getRTVItemDtlsCr(
     params: GetRTVItemDtlsCrRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -815,19 +560,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getRTVItemDtlsCr: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getRTVItemDtlsCr");
   }
 
   // =====================================================
@@ -841,11 +574,7 @@ export class ShowroomRepository {
   async getPhyInvQueryDtls(
     params: GetPhyInvQueryDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -865,19 +594,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPhyInvQueryDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPhyInvQueryDtls");
   }
 
   /**
@@ -887,11 +604,7 @@ export class ShowroomRepository {
   async getPhyInvCntItemDtls(
     params: GetPhyInvCntItemDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -911,19 +624,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPhyInvCntItemDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPhyInvCntItemDtls");
   }
 
   /**
@@ -933,11 +634,7 @@ export class ShowroomRepository {
   async getPhyInvCntItemCr(
     params: GetPhyInvCntItemCrRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -956,19 +653,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getPhyInvCntItemCr: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getPhyInvCntItemCr");
   }
 
   // =====================================================
@@ -982,11 +667,7 @@ export class ShowroomRepository {
   async getIoShipmentNo(
     params: GetIoShipmentNoRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -1006,19 +687,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getIoShipmentNo: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getIoShipmentNo");
   }
 
   /**
@@ -1028,11 +697,7 @@ export class ShowroomRepository {
   async getIoRcptItemDtls(
     params: GetIoRcptItemDtlsRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -1051,19 +716,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getIoRcptItemDtls: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getIoRcptItemDtls");
   }
 
   /**
@@ -1073,11 +726,7 @@ export class ShowroomRepository {
   async getIoRcptItemDtlsCr(
     params: GetIoRcptItemDtlsCrRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       const result = await connection.execute<{
         result: oracledb.ResultSet<any>;
       }>(
@@ -1096,19 +745,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { data: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in getIoRcptItemDtlsCr: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, " getIoRcptItemDtlsCr");
   }
 
   // =====================================================
@@ -1121,11 +758,7 @@ export class ShowroomRepository {
    * Returns P_MO_RESULT with STATUS_CODE and MESSAGE
    */
   async moConfirm(params: ConfirmationRequest): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       // Serialize P_INPUT to JSON string matching Spring Boot implementation
       const P_INPUT = params.P_INPUT ? JSON.stringify(params.P_INPUT) : "";
 
@@ -1146,19 +779,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { P_MO_RESULT: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in moConfirm: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "moConfirm");
   }
 
   /**
@@ -1167,11 +788,7 @@ export class ShowroomRepository {
    * Returns P_IO_RESULT with STATUS_CODE and MESSAGE
    */
   async ioConfirm(params: ConfirmationRequest): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       // Serialize P_INPUT to JSON string matching Spring Boot implementation
       const P_INPUT = params.P_INPUT ? JSON.stringify(params.P_INPUT) : "";
 
@@ -1192,19 +809,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { P_IO_RESULT: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in ioConfirm: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "ioConfirm");
   }
 
   /**
@@ -1213,11 +818,7 @@ export class ShowroomRepository {
    * Returns P_PO_RESULT with STATUS_CODE and MESSAGE
    */
   async poConfirm(params: ConfirmationRequest): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       // Serialize P_INPUT to JSON string matching Spring Boot implementation
       const P_INPUT = params.P_INPUT ? JSON.stringify(params.P_INPUT) : "";
 
@@ -1238,19 +839,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { P_PO_RESULT: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in poConfirm: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "poConfirm");
   }
 
   /**
@@ -1261,11 +850,7 @@ export class ShowroomRepository {
   async rtvConfirm(
     params: ConfirmationRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       // Serialize P_INPUT to JSON string matching Spring Boot implementation
       const P_INPUT = params.P_INPUT ? JSON.stringify(params.P_INPUT) : "";
 
@@ -1286,19 +871,7 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { P_RTV_RESULT: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in rtvConfirm: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "rtvConfirm");
   }
 
   /**
@@ -1309,11 +882,7 @@ export class ShowroomRepository {
   async stockConfirm(
     params: ConfirmationRequest
   ): Promise<OraclePackageResponse> {
-    let connection: oracledb.Connection | undefined;
-
-    try {
-      connection = await OracleConnection.getConnection();
-
+    return withDatabaseConnection(async (connection) => {
       // Serialize P_INPUT to JSON string matching Spring Boot implementation
       const P_INPUT = params.P_INPUT ? JSON.stringify(params.P_INPUT) : "";
 
@@ -1334,18 +903,6 @@ export class ShowroomRepository {
       await cursor.close();
 
       return { P_STOCK_RESULT: rows };
-    } catch (error) {
-      throw new Error(
-        `Error in stockConfirm: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error("Error closing connection:", closeError);
-        }
-      }
-    }
+    }, "stockConfirm");
   }
 }

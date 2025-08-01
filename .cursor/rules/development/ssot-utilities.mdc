@@ -1,0 +1,180 @@
+---
+description: Single Source of Truth (SSOT) utilities - MANDATORY usage patterns for all backend development.
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Single Source of Truth (SSOT) Utilities
+
+This file defines the MANDATORY SSOT utilities that ALL backend code must use to maintain consistency and reduce duplication.
+
+## Database Operations
+
+**MANDATORY: `withDatabaseConnection()`**
+
+```ts
+import { withDatabaseConnection } from "../utils/databaseWrapper";
+
+// Repository method pattern
+async someMethod(): Promise<Entity[]> {
+  return withDatabaseConnection(async (connection) => {
+    const result = await connection.execute(sql, binds, {
+      outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+    });
+    return result.rows as Entity[];
+  }, "someMethod");
+}
+```
+
+**Oracle Helpers:**
+
+```ts
+import {
+  executeCountQuery,
+  getNextSequenceValue,
+} from "../utils/oracleHelpers";
+
+// Count operations
+const count = await executeCountQuery("TABLE_NAME", "WHERE_CLAUSE", binds);
+
+// Sequence generation
+const nextId = await getNextSequenceValue("SEQUENCE_NAME");
+```
+
+## Response Patterns
+
+**MANDATORY: Response Utilities**
+
+```ts
+import { createSuccessResponse, createErrorResponse, createValidationErrorResponse } from "../validators/common";
+
+// Service methods
+async someMethod(): Promise<APIResponse> {
+  try {
+    const result = await this.repo.getData();
+    return createSuccessResponse(result);
+  } catch (error) {
+    return createErrorResponse(500, "Error message", error);
+  }
+}
+```
+
+## Controller Patterns
+
+**MANDATORY: Controller Helpers**
+
+```ts
+import {
+  createControllerHandler,
+  createGetHandler,
+  validateArrayBody,
+  validateWrapperBody,
+} from "../utils/controllerHelpers";
+
+export class SomeController {
+  // POST with array validation
+  createItems = createControllerHandler(
+    (entities: unknown) => this.service.createItems(entities as any),
+    (body) => validateArrayBody(body, "items")
+  );
+
+  // GET endpoints
+  getAllItems = createGetHandler(() => this.service.getAllItems());
+
+  // POST with wrapper validation
+  createWrapper = createControllerHandler(
+    (wrapper: unknown) => this.service.createWrapper(wrapper as any),
+    (body) => validateWrapperBody(body, ["items", "metadata"])
+  );
+}
+```
+
+## Validation Schemas
+
+**MANDATORY: Common Schemas**
+
+```ts
+import {
+  apiResponseSchema,
+  optionalString,
+  optionalNumber,
+  optionalDate,
+  requiredString,
+  requiredNumber,
+} from "../validators/common";
+
+// Entity schemas
+const itemSchema = z.object({
+  name: requiredString,
+  description: optionalString,
+  price: optionalNumber,
+  createdAt: optionalDate,
+});
+
+// All API responses must use
+const responseSchema = apiResponseSchema;
+```
+
+## Transaction Logging
+
+**Available Utilities:**
+
+```ts
+import {
+  createTransactionLog,
+  updateTransactionLogResponse,
+  createFailedRecordLog,
+} from "../utils/transactionLogger";
+
+// Create transaction log
+const log = createTransactionLog("ModuleName", request);
+
+// Update with response
+updateTransactionLogResponse(log, response);
+
+// Log failed records
+createFailedRecordLog("ModuleName", failedRecord);
+```
+
+## Prohibited Patterns
+
+**DO NOT USE - Legacy Manual Patterns:**
+
+```ts
+// ❌ Manual database connection management
+const connection = await OracleConnection.getConnection();
+try {
+  // operations
+} finally {
+  await connection.close();
+}
+
+// ❌ Manual response objects
+return { data: result, status: 200, success: true };
+return { error: "Error", status: 500, success: false };
+
+// ❌ Manual controller try/catch
+export const handler = async (req, res, next) => {
+  try {
+    const result = await service.method();
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ❌ Manual validation schemas
+const customResponseSchema = z.object({ data: z.any(), status: z.number() });
+```
+
+## Compliance
+
+- **ALL** new repositories must use `withDatabaseConnection()`
+- **ALL** new services must use `createSuccessResponse()`/`createErrorResponse()`
+- **ALL** new controllers must use `createControllerHandler()`/`createGetHandler()`
+- **ALL** new validators must use common schemas from `validators/common.ts`
+- **NO** manual connection management allowed
+- **NO** manual response object creation allowed
+
+---

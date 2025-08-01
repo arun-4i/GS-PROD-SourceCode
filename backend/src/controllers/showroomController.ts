@@ -7,6 +7,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ShowroomService } from "../services/showroomService";
 import { APIResponse } from "../entities/showroom.entity";
+import { createControllerHandler } from "../utils/controllerHelpers";
 
 export class ShowroomController {
   private showroomService: ShowroomService;
@@ -24,20 +25,10 @@ export class ShowroomController {
    * Route: POST /module/showroom/getInvOrg
    * Migrated from ShowroomCO.getInvOrg method
    */
-  getInvOrg = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const result: APIResponse = await this.showroomService.getInvOrg(
-        req.body
-      );
-      res.status(200).json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
+  // REFACTORED: Example using centralized controller helper
+  getInvOrg = createControllerHandler((body: unknown) =>
+    this.showroomService.getInvOrg(body as any)
+  );
 
   /**
    * Get Physical Inventories

@@ -3,6 +3,7 @@ import { BinTransferTrackPickEntity } from "../entities/binTransferTrackPick.ent
 import { BinTransferTrackDropEntity } from "../entities/binTransferTrackDrop.entity";
 import { QuickDropEntity } from "../entities/quickDrop.entity";
 import { OracleConnection } from "../config/database";
+import { withDatabaseConnection } from "../utils/databaseWrapper";
 import { OraclePackageService } from "../services/oraclePackageService";
 
 export class BinTransferTrackRepository {
@@ -16,77 +17,98 @@ export class BinTransferTrackRepository {
   }
 
   // BinTransferTrack Header Operations
+  // REFACTORED: Uses centralized database wrapper
   async getAllBinTransferHdr(): Promise<BinTransferTrackHdrEntity[]> {
-    const sql = `SELECT * FROM ${this.hdrTableName} ORDER BY HEADER_ID`;
-    const result = await OracleConnection.executeQuery(sql);
-    return result.rows as BinTransferTrackHdrEntity[];
+    return withDatabaseConnection(async (connection) => {
+      const sql = `SELECT * FROM ${this.hdrTableName} ORDER BY HEADER_ID`;
+      const result = await connection.execute(sql, [], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return result.rows as BinTransferTrackHdrEntity[];
+    }, "getAllBinTransferHdr");
   }
 
+  // REFACTORED: Uses centralized database wrapper
   async insertBinTransferHdr(
     entity: BinTransferTrackHdrEntity
   ): Promise<BinTransferTrackHdrEntity> {
-    const sql = `
-      INSERT INTO ${this.hdrTableName} (
-        HEADER_ID, REF, INV_ORG, INV_ORG_ID, SUB_INV_NAME,
-        ATTRIBUTE_CATEGORY, ATTRIBUTE1, ATTRIBUTE2, ATTRIBUTE3, ATTRIBUTE4, ATTRIBUTE5,
-        ATTRIBUTE6, ATTRIBUTE7, ATTRIBUTE8, ATTRIBUTE9, ATTRIBUTE10,
-        LAST_UPDATE_DATE, LAST_UPDATED_BY, CREATION_DATE, CREATED_BY, LAST_UPDATE_LOGIN
-      ) VALUES (
-        xxgs_bin_trns_header_id_s.NEXTVAL, :ref, :invOrg, :invOrgId, :subInvName,
-        :attributeCategory, :attribute1, :attribute2, :attribute3, :attribute4, :attribute5,
-        :attribute6, :attribute7, :attribute8, :attribute9, :attribute10,
-        :lastUpdateDate, :lastUpdatedBy, :creationDate, :createdBy, :lastUpdateLogin
-      )
-    `;
+    return withDatabaseConnection(async (connection) => {
+      const sql = `
+        INSERT INTO ${this.hdrTableName} (
+          HEADER_ID, REF, INV_ORG, INV_ORG_ID, SUB_INV_NAME,
+          ATTRIBUTE_CATEGORY, ATTRIBUTE1, ATTRIBUTE2, ATTRIBUTE3, ATTRIBUTE4, ATTRIBUTE5,
+          ATTRIBUTE6, ATTRIBUTE7, ATTRIBUTE8, ATTRIBUTE9, ATTRIBUTE10,
+          LAST_UPDATE_DATE, LAST_UPDATED_BY, CREATION_DATE, CREATED_BY, LAST_UPDATE_LOGIN
+        ) VALUES (
+          xxgs_bin_trns_header_id_s.NEXTVAL, :ref, :invOrg, :invOrgId, :subInvName,
+          :attributeCategory, :attribute1, :attribute2, :attribute3, :attribute4, :attribute5,
+          :attribute6, :attribute7, :attribute8, :attribute9, :attribute10,
+          :lastUpdateDate, :lastUpdatedBy, :creationDate, :createdBy, :lastUpdateLogin
+        )
+      `;
 
-    const binds = {
-      ref: entity.ref,
-      invOrg: entity.invOrg,
-      invOrgId: entity.invOrgId,
-      subInvName: entity.subInvName,
-      attributeCategory: entity.attributeCategory,
-      attribute1: entity.attribute1,
-      attribute2: entity.attribute2,
-      attribute3: entity.attribute3,
-      attribute4: entity.attribute4,
-      attribute5: entity.attribute5,
-      attribute6: entity.attribute6,
-      attribute7: entity.attribute7,
-      attribute8: entity.attribute8,
-      attribute9: entity.attribute9,
-      attribute10: entity.attribute10,
-      lastUpdateDate: entity.lastUpdateDate,
-      lastUpdatedBy: entity.lastUpdatedBy,
-      creationDate: entity.creationDate,
-      createdBy: entity.createdBy,
-      lastUpdateLogin: entity.lastUpdateLogin,
-    };
+      const binds = {
+        ref: entity.ref,
+        invOrg: entity.invOrg,
+        invOrgId: entity.invOrgId,
+        subInvName: entity.subInvName,
+        attributeCategory: entity.attributeCategory,
+        attribute1: entity.attribute1,
+        attribute2: entity.attribute2,
+        attribute3: entity.attribute3,
+        attribute4: entity.attribute4,
+        attribute5: entity.attribute5,
+        attribute6: entity.attribute6,
+        attribute7: entity.attribute7,
+        attribute8: entity.attribute8,
+        attribute9: entity.attribute9,
+        attribute10: entity.attribute10,
+        lastUpdateDate: entity.lastUpdateDate,
+        lastUpdatedBy: entity.lastUpdatedBy,
+        creationDate: entity.creationDate,
+        createdBy: entity.createdBy,
+        lastUpdateLogin: entity.lastUpdateLogin,
+      };
 
-    await OracleConnection.executeQuery(sql, binds, { autoCommit: true });
+      await connection.execute(sql, binds, { autoCommit: true });
 
-    // Fetch and return the inserted entity
-    const selectSql = `SELECT * FROM ${this.hdrTableName} WHERE REF = :ref ORDER BY HEADER_ID DESC`;
-    const result = await OracleConnection.executeQuery(selectSql, {
-      ref: entity.ref,
-    });
+      // Fetch and return the inserted entity
+      const selectSql = `SELECT * FROM ${this.hdrTableName} WHERE REF = :ref ORDER BY HEADER_ID DESC`;
+      const result = await connection.execute(
+        selectSql,
+        {
+          ref: entity.ref,
+        },
+        {
+          outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+        }
+      );
 
-    if (!result.rows || result.rows.length === 0) {
-      throw new Error("BinTransferTrackHdr insert failed");
-    }
-    return result.rows[0] as BinTransferTrackHdrEntity;
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("BinTransferTrackHdr insert failed");
+      }
+      return result.rows[0] as BinTransferTrackHdrEntity;
+    }, "insertBinTransferHdr");
   }
 
   // BinTransferTrack Pick Operations
+  // REFACTORED: Uses centralized database wrapper
   async getAllBinTransferPick(): Promise<BinTransferTrackPickEntity[]> {
-    const sql = `SELECT * FROM ${this.pickTableName} ORDER BY LINE_ID`;
-    const result = await OracleConnection.executeQuery(sql);
-    return result.rows as BinTransferTrackPickEntity[];
+    return withDatabaseConnection(async (connection) => {
+      const sql = `SELECT * FROM ${this.pickTableName} ORDER BY LINE_ID`;
+      const result = await connection.execute(sql, [], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return result.rows as BinTransferTrackPickEntity[];
+    }, "getAllBinTransferPick");
   }
 
+  // REFACTORED: Uses centralized database wrapper
   async insertBinTransferPick(
     entity: BinTransferTrackPickEntity
   ): Promise<BinTransferTrackPickEntity> {
-    const sql = `
+    return withDatabaseConnection(async (connection) => {
+      const sql = `
       INSERT INTO ${this.pickTableName} (
         LINE_ID, HEADER_ID, INV_ORG, INV_ORG_ID, INVENTORY_ITEM_ID, ITEM_CODE, DESCRIPTION,
         UOM, PICKED_QTY, PICKED_SUBINV, PICKED_LOCATOR, PICKED_LOCATOR_ID, TYPE,
@@ -102,63 +124,77 @@ export class BinTransferTrackRepository {
       )
     `;
 
-    const binds = {
-      headerId: entity.headerId,
-      invOrg: entity.invOrg,
-      invOrgId: entity.invOrgId,
-      inventoryItemId: entity.inventoryItemId,
-      itemCode: entity.itemCode,
-      description: entity.description,
-      uom: entity.uom,
-      pickedQty: entity.pickedQty,
-      pickedSubinv: entity.pickedSubinv,
-      pickedLocator: entity.pickedLocator,
-      pickedlocatorId: entity.pickedlocatorId,
-      type: entity.type,
-      attributeCategory: entity.attributeCategory,
-      attribute1: entity.attribute1,
-      attribute2: entity.attribute2,
-      attribute3: entity.attribute3,
-      attribute4: entity.attribute4,
-      attribute5: entity.attribute5,
-      attribute6: entity.attribute6,
-      attribute7: entity.attribute7,
-      attribute8: entity.attribute8,
-      attribute9: entity.attribute9,
-      attribute10: entity.attribute10,
-      lastUpdateDate: entity.lastUpdateDate,
-      lastUpdatedBy: entity.lastUpdatedBy,
-      creationDate: entity.creationDate,
-      createdBy: entity.createdBy,
-      lastUpdateLogin: entity.lastUpdateLogin,
-    };
+      const binds = {
+        headerId: entity.headerId,
+        invOrg: entity.invOrg,
+        invOrgId: entity.invOrgId,
+        inventoryItemId: entity.inventoryItemId,
+        itemCode: entity.itemCode,
+        description: entity.description,
+        uom: entity.uom,
+        pickedQty: entity.pickedQty,
+        pickedSubinv: entity.pickedSubinv,
+        pickedLocator: entity.pickedLocator,
+        pickedlocatorId: entity.pickedlocatorId,
+        type: entity.type,
+        attributeCategory: entity.attributeCategory,
+        attribute1: entity.attribute1,
+        attribute2: entity.attribute2,
+        attribute3: entity.attribute3,
+        attribute4: entity.attribute4,
+        attribute5: entity.attribute5,
+        attribute6: entity.attribute6,
+        attribute7: entity.attribute7,
+        attribute8: entity.attribute8,
+        attribute9: entity.attribute9,
+        attribute10: entity.attribute10,
+        lastUpdateDate: entity.lastUpdateDate,
+        lastUpdatedBy: entity.lastUpdatedBy,
+        creationDate: entity.creationDate,
+        createdBy: entity.createdBy,
+        lastUpdateLogin: entity.lastUpdateLogin,
+      };
 
-    await OracleConnection.executeQuery(sql, binds, { autoCommit: true });
+      await connection.execute(sql, binds, { autoCommit: true });
 
-    // Fetch and return the inserted entity
-    const selectSql = `SELECT * FROM ${this.pickTableName} WHERE HEADER_ID = :headerId AND ITEM_CODE = :itemCode ORDER BY LINE_ID DESC`;
-    const result = await OracleConnection.executeQuery(selectSql, {
-      headerId: entity.headerId,
-      itemCode: entity.itemCode,
-    });
+      // Fetch and return the inserted entity
+      const selectSql = `SELECT * FROM ${this.pickTableName} WHERE HEADER_ID = :headerId AND ITEM_CODE = :itemCode ORDER BY LINE_ID DESC`;
+      const result = await connection.execute(
+        selectSql,
+        {
+          headerId: entity.headerId,
+          itemCode: entity.itemCode,
+        },
+        {
+          outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+        }
+      );
 
-    if (!result.rows || result.rows.length === 0) {
-      throw new Error("BinTransferTrackPick insert failed");
-    }
-    return result.rows[0] as BinTransferTrackPickEntity;
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("BinTransferTrackPick insert failed");
+      }
+      return result.rows[0] as BinTransferTrackPickEntity;
+    }, "insertBinTransferPick");
   }
 
   // BinTransferTrack Drop Operations
+  // REFACTORED: Uses centralized database wrapper
   async getAllBinTransferDrop(): Promise<BinTransferTrackDropEntity[]> {
-    const sql = `SELECT * FROM ${this.dropTableName} ORDER BY DROP_ID`;
-    const result = await OracleConnection.executeQuery(sql);
-    return result.rows as BinTransferTrackDropEntity[];
+    return withDatabaseConnection(async (connection) => {
+      const sql = `SELECT * FROM ${this.dropTableName} ORDER BY DROP_ID`;
+      const result = await connection.execute(sql, [], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return result.rows as BinTransferTrackDropEntity[];
+    }, "getAllBinTransferDrop");
   }
 
+  // REFACTORED: Uses centralized database wrapper
   async insertBinTransferDrop(
     entity: BinTransferTrackDropEntity
   ): Promise<BinTransferTrackDropEntity> {
-    const sql = `
+    return withDatabaseConnection(async (connection) => {
+      const sql = `
       INSERT INTO ${this.dropTableName} (
         DROP_ID, LINE_ID, INVENTORY_ITEM_ID, ITEM_CODE, DESCRIPTION, UOM, DROP_QTY,
         DROP_SUBINV, DROP_LOCATOR, DROP_LOCATOR_ID, TYPE,
@@ -174,48 +210,55 @@ export class BinTransferTrackRepository {
       )
     `;
 
-    const binds = {
-      lineId: entity.lineId,
-      inventoryItemId: entity.inventoryItemId,
-      itemCode: entity.itemCode,
-      description: entity.description,
-      uom: entity.uom,
-      dropQty: entity.dropQty,
-      dropSubinv: entity.dropSubinv,
-      dropLocator: entity.dropLocator,
-      dropLocatorId: entity.dropLocatorId,
-      type: entity.type,
-      attributeCategory: entity.attributeCategory,
-      attribute1: entity.attribute1,
-      attribute2: entity.attribute2,
-      attribute3: entity.attribute3,
-      attribute4: entity.attribute4,
-      attribute5: entity.attribute5,
-      attribute6: entity.attribute6,
-      attribute7: entity.attribute7,
-      attribute8: entity.attribute8,
-      attribute9: entity.attribute9,
-      attribute10: entity.attribute10,
-      lastUpdateDate: entity.lastUpdateDate,
-      lastUpdatedBy: entity.lastUpdatedBy,
-      creationDate: entity.creationDate,
-      createdBy: entity.createdBy,
-      lastUpdateLogin: entity.lastUpdateLogin,
-    };
+      const binds = {
+        lineId: entity.lineId,
+        inventoryItemId: entity.inventoryItemId,
+        itemCode: entity.itemCode,
+        description: entity.description,
+        uom: entity.uom,
+        dropQty: entity.dropQty,
+        dropSubinv: entity.dropSubinv,
+        dropLocator: entity.dropLocator,
+        dropLocatorId: entity.dropLocatorId,
+        type: entity.type,
+        attributeCategory: entity.attributeCategory,
+        attribute1: entity.attribute1,
+        attribute2: entity.attribute2,
+        attribute3: entity.attribute3,
+        attribute4: entity.attribute4,
+        attribute5: entity.attribute5,
+        attribute6: entity.attribute6,
+        attribute7: entity.attribute7,
+        attribute8: entity.attribute8,
+        attribute9: entity.attribute9,
+        attribute10: entity.attribute10,
+        lastUpdateDate: entity.lastUpdateDate,
+        lastUpdatedBy: entity.lastUpdatedBy,
+        creationDate: entity.creationDate,
+        createdBy: entity.createdBy,
+        lastUpdateLogin: entity.lastUpdateLogin,
+      };
 
-    await OracleConnection.executeQuery(sql, binds, { autoCommit: true });
+      await connection.execute(sql, binds, { autoCommit: true });
 
-    // Fetch and return the inserted entity
-    const selectSql = `SELECT * FROM ${this.dropTableName} WHERE LINE_ID = :lineId AND ITEM_CODE = :itemCode ORDER BY DROP_ID DESC`;
-    const result = await OracleConnection.executeQuery(selectSql, {
-      lineId: entity.lineId,
-      itemCode: entity.itemCode,
-    });
+      // Fetch and return the inserted entity
+      const selectSql = `SELECT * FROM ${this.dropTableName} WHERE LINE_ID = :lineId AND ITEM_CODE = :itemCode ORDER BY DROP_ID DESC`;
+      const result = await connection.execute(
+        selectSql,
+        {
+          lineId: entity.lineId,
+          itemCode: entity.itemCode,
+        },
+        {
+          outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+        }
+      );
 
-    if (!result.rows || result.rows.length === 0) {
-      throw new Error("BinTransferTrackDrop insert failed");
-    }
-    return result.rows[0] as BinTransferTrackDropEntity;
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("BinTransferTrackDrop insert failed");
+      }
+      return result.rows[0] as BinTransferTrackDropEntity;
+    }, "insertBinTransferDrop");
   }
 
   // Oracle Package Operations

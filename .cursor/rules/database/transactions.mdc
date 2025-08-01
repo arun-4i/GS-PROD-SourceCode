@@ -28,19 +28,31 @@ const pool = await oracledb.createPool({
 
 ## Transaction Management
 
-- Use transactions for multi-step DB operations
-- Example:
+**MANDATORY: Use SSOT Database Wrapper**
+
+All database operations MUST use `withDatabaseConnection()` wrapper:
 
 ```ts
+import { withDatabaseConnection } from "../utils/databaseWrapper";
+
+// Repository method example
+async someMethod(): Promise<Entity[]> {
+  return withDatabaseConnection(async (connection) => {
+    const result = await connection.execute(sql, binds, {
+      outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+    });
+    return result.rows as Entity[];
+  }, "someMethod");
+}
+```
+
+**Legacy Manual Pattern (DO NOT USE):**
+
+```ts
+// DEPRECATED - Do not use manual connection management
 const connection = await pool.getConnection();
 try {
-  await connection.execute("BEGIN");
-  await connection.execute("INSERT INTO ...", bindVars1);
-  await connection.execute("UPDATE ...", bindVars2);
-  await connection.execute("COMMIT");
-} catch (err) {
-  await connection.execute("ROLLBACK");
-  throw err;
+  // ... operations
 } finally {
   await connection.close();
 }
@@ -49,10 +61,29 @@ try {
 - For DB package calls, use bind variables for all parameters.
 - Always handle errors and roll back on failure.
 
+## Oracle Helper Utilities
+
+For common database operations, use centralized helpers:
+
+```ts
+import {
+  executeCountQuery,
+  getNextSequenceValue,
+} from "../utils/oracleHelpers";
+
+// Count records
+const count = await executeCountQuery("TABLE_NAME", "WHERE_CLAUSE", binds);
+
+// Get next sequence value
+const nextId = await getNextSequenceValue("SEQUENCE_NAME");
+```
+
 ## Best Practices
 
-- Use transactions for all write operations that affect multiple tables.
-- Always use bind variables to prevent SQL injection.
-- Reference [rules/database/entities.mdc] for entity and DB package usage standards.
+- **MANDATORY**: Use `withDatabaseConnection()` wrapper for ALL database operations
+- Use `executeCountQuery()` for count operations instead of manual queries
+- Use `getNextSequenceValue()` for sequence generation
+- Always use bind variables to prevent SQL injection
+- Reference [rules/database/entities.mdc] for entity and DB package usage standards
 
 ---

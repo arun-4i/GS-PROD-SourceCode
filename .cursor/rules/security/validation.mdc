@@ -11,17 +11,29 @@ This file defines input validation and sanitization standards for backend develo
 
 ## Input Validation
 
-- Validate all incoming data (body, params, query) using Zod schemas
-- Reject requests with invalid or missing data
-- Example:
+**MANDATORY: Use SSOT Common Schemas**
+
+All validators MUST use common schemas from `validators/common.ts`:
 
 ```ts
-import { z } from "zod";
+import {
+  apiResponseSchema,
+  optionalString,
+  optionalNumber,
+  requiredString,
+  requiredNumber,
+  createValidationErrorResponse,
+} from "../validators/common";
+
+// Entity schema example
 const userSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: requiredString.email(),
+  name: optionalString,
+  age: optionalNumber,
 });
-userSchema.parse(req.body);
+
+// API response schema (for all routes)
+const userResponseSchema = apiResponseSchema;
 ```
 
 ## Sanitization

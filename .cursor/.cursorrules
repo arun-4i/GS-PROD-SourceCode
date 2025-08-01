@@ -18,6 +18,20 @@
 
 # always reference [rules/backend-dev.mdc] for coding standards, required packages, and architectural patterns. This file is the single source of truth for backend best practices.
 
+# SINGLE SOURCE OF TRUTH (SSOT) PATTERNS - MANDATORY:
+
+# All new code MUST use these centralized utilities to maintain consistency:
+
+# - Database: withDatabaseConnection() from utils/databaseWrapper.ts
+
+# - Responses: createSuccessResponse(), createErrorResponse() from validators/common.ts
+
+# - Controllers: createControllerHandler(), createGetHandler() from utils/controllerHelpers.ts
+
+# - Validation: Use common schemas from validators/common.ts
+
+# - Oracle: executeCountQuery(), getNextSequenceValue() from utils/oracleHelpers.ts
+
 # IMPORTANT: All rules, tasks, feedback, docs and .cursorrules reside inside the .cursor folder only.
 
 # New rule files, task plans, feedback files, and documentation should be created inside the .cursor folder structure.
@@ -64,6 +78,8 @@
 
 # [rules/development/testing.mdc] - Test patterns, coverage requirements
 
+# [rules/development/ssot-utilities.mdc] - MANDATORY SSOT utilities and patterns
+
 # [rules/development/migrations.mdc] - Spring Boot migration standards, error prevention
 
 # [rules/database/entities.mdc] - Entity patterns, DB package usage, node-oracledb
@@ -99,6 +115,7 @@
 [rules/development/logging.mdc]
 [rules/development/swagger.mdc]
 [rules/development/testing.mdc]
+[rules/development/ssot-utilities.mdc]
 [rules/development/migrations.mdc]
 [rules/database/entities.mdc]
 [rules/database/migrations.mdc]

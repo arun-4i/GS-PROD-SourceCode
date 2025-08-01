@@ -1,6 +1,6 @@
 import { IoConLotEntity } from "../entities/ioConLot.entity";
 import { InvCountConfirmEntity } from "../entities/invCountConfirm.entity";
-import { OracleConnection } from "../config/database";
+import { withDatabaseConnection } from "../utils/databaseWrapper";
 import { OraclePackageService } from "../services/oraclePackageService";
 
 export class BinTransferPackageRepository {
@@ -43,14 +43,21 @@ export class BinTransferPackageRepository {
   }
 
   // IOConLot Operations
+  // REFACTORED: Uses centralized database wrapper
   async getAllIOConLot(): Promise<IoConLotEntity[]> {
-    const sql = `SELECT * FROM ${this.ioConLotTableName} ORDER BY LOT_ID`;
-    const result = await OracleConnection.executeQuery(sql);
-    return result.rows as IoConLotEntity[];
+    return withDatabaseConnection(async (connection) => {
+      const sql = `SELECT * FROM ${this.ioConLotTableName} ORDER BY LOT_ID`;
+      const result = await connection.execute(sql, [], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return result.rows as IoConLotEntity[];
+    }, "getAllIOConLot");
   }
 
+  // REFACTORED: Uses centralized database wrapper
   async insertIOConLot(entity: IoConLotEntity): Promise<IoConLotEntity> {
-    const sql = `
+    return withDatabaseConnection(async (connection) => {
+      const sql = `
       INSERT INTO ${this.ioConLotTableName} (
         LOT_ID, TRANSACTION_TYPE, LOT_NUMBER, LOT_EXPIRY_DATE, LOT_QUANTITY,
         ATTRIBUTE_CATEGORY, ATTRIBUTE1, ATTRIBUTE2, ATTRIBUTE3, ATTRIBUTE4, ATTRIBUTE5,
@@ -66,61 +73,75 @@ export class BinTransferPackageRepository {
       )
     `;
 
-    const binds = {
-      transactionType: entity.transactionType,
-      lotNumber: entity.lotNumber,
-      lotExpiryDate: entity.lotExpiryDate,
-      lotQuantity: entity.lotQuantity,
-      attributeCategory: entity.attributeCategory,
-      attribute1: entity.attribute1,
-      attribute2: entity.attribute2,
-      attribute3: entity.attribute3,
-      attribute4: entity.attribute4,
-      attribute5: entity.attribute5,
-      attribute6: entity.attribute6,
-      attribute7: entity.attribute7,
-      attribute8: entity.attribute8,
-      attribute9: entity.attribute9,
-      attribute10: entity.attribute10,
-      attribute11: entity.attribute11,
-      attribute12: entity.attribute12,
-      attribute13: entity.attribute13,
-      attribute14: entity.attribute14,
-      attribute15: entity.attribute15,
-      lastUpdateDate: entity.lastUpdateDate,
-      lastUpdatedBy: entity.lastUpdatedBy,
-      creationDate: entity.creationDate,
-      createdBy: entity.createdBy,
-      lastUpdateLogin: entity.lastUpdateLogin,
-      transactionTypeId: entity.transactionTypeId,
-    };
+      const binds = {
+        transactionType: entity.transactionType,
+        lotNumber: entity.lotNumber,
+        lotExpiryDate: entity.lotExpiryDate,
+        lotQuantity: entity.lotQuantity,
+        attributeCategory: entity.attributeCategory,
+        attribute1: entity.attribute1,
+        attribute2: entity.attribute2,
+        attribute3: entity.attribute3,
+        attribute4: entity.attribute4,
+        attribute5: entity.attribute5,
+        attribute6: entity.attribute6,
+        attribute7: entity.attribute7,
+        attribute8: entity.attribute8,
+        attribute9: entity.attribute9,
+        attribute10: entity.attribute10,
+        attribute11: entity.attribute11,
+        attribute12: entity.attribute12,
+        attribute13: entity.attribute13,
+        attribute14: entity.attribute14,
+        attribute15: entity.attribute15,
+        lastUpdateDate: entity.lastUpdateDate,
+        lastUpdatedBy: entity.lastUpdatedBy,
+        creationDate: entity.creationDate,
+        createdBy: entity.createdBy,
+        lastUpdateLogin: entity.lastUpdateLogin,
+        transactionTypeId: entity.transactionTypeId,
+      };
 
-    await OracleConnection.executeQuery(sql, binds, { autoCommit: true });
+      await connection.execute(sql, binds, { autoCommit: true });
 
-    // Fetch and return the inserted entity
-    const selectSql = `SELECT * FROM ${this.ioConLotTableName} WHERE TRANSACTION_TYPE = :transactionType AND LOT_NUMBER = :lotNumber`;
-    const result = await OracleConnection.executeQuery(selectSql, {
-      transactionType: entity.transactionType,
-      lotNumber: entity.lotNumber,
-    });
+      // Fetch and return the inserted entity
+      const selectSql = `SELECT * FROM ${this.ioConLotTableName} WHERE TRANSACTION_TYPE = :transactionType AND LOT_NUMBER = :lotNumber`;
+      const result = await connection.execute(
+        selectSql,
+        {
+          transactionType: entity.transactionType,
+          lotNumber: entity.lotNumber,
+        },
+        {
+          outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+        }
+      );
 
-    if (!result.rows || result.rows.length === 0) {
-      throw new Error("IOConLot insert failed");
-    }
-    return result.rows[0] as IoConLotEntity;
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("IOConLot insert failed");
+      }
+      return result.rows[0] as IoConLotEntity;
+    }, "insertIOConLot");
   }
 
   // InvCountConfirm Operations
+  // REFACTORED: Uses centralized database wrapper
   async getAllInvCountConfirm(): Promise<InvCountConfirmEntity[]> {
-    const sql = `SELECT * FROM ${this.invCountConfirmTableName} ORDER BY INV_COUNT_ID`;
-    const result = await OracleConnection.executeQuery(sql);
-    return result.rows as InvCountConfirmEntity[];
+    return withDatabaseConnection(async (connection) => {
+      const sql = `SELECT * FROM ${this.invCountConfirmTableName} ORDER BY INV_COUNT_ID`;
+      const result = await connection.execute(sql, [], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return result.rows as InvCountConfirmEntity[];
+    }, "getAllInvCountConfirm");
   }
 
+  // REFACTORED: Uses centralized database wrapper
   async insertInvCountConfirm(
     entity: InvCountConfirmEntity
   ): Promise<InvCountConfirmEntity> {
-    const sql = `
+    return withDatabaseConnection(async (connection) => {
+      const sql = `
       INSERT INTO ${this.invCountConfirmTableName} (
         INV_COUNT_ID, PHYSICAL_INV_NAME, PHYSICAL_INV_ID, SUB_INVENTORY, LOCATORS, LOCATORS_ID,
         TAG_NUMBER, TAG_ID, ITEM_CODE, ITEM_ID, ORGANIZATION_ID, ORGANIZATION_CODE, STATUS,
@@ -142,65 +163,72 @@ export class BinTransferPackageRepository {
       )
     `;
 
-    const binds = {
-      physicalInvName: entity.physicalInvName,
-      physicalInvId: entity.physicalInvId,
-      subInventory: entity.subInventory,
-      locators: entity.locators,
-      locatorsId: entity.locatorsId,
-      tagNumber: entity.tagNumber,
-      tagId: entity.tagId,
-      itemCode: entity.itemCode,
-      itemId: entity.itemId,
-      organizationId: entity.organizationId,
-      organizationCode: entity.organizationCode,
-      status: entity.status,
-      uom: entity.uom,
-      lotNumber: entity.lotNumber,
-      lotExpires: entity.lotExpires,
-      currentOnHand: entity.currentOnHand,
-      countQty: entity.countQty,
-      approvedVariance: entity.approvedVariance,
-      onHandVariance: entity.onHandVariance,
-      adjustValue: entity.adjustValue,
-      errorMsg: entity.errorMsg,
-      parentFlag: entity.parentFlag,
-      attributeCategory: entity.attributeCategory,
-      attribute1: entity.attribute1,
-      attribute2: entity.attribute2,
-      attribute3: entity.attribute3,
-      attribute4: entity.attribute4,
-      attribute5: entity.attribute5,
-      attribute6: entity.attribute6,
-      attribute7: entity.attribute7,
-      attribute8: entity.attribute8,
-      attribute9: entity.attribute9,
-      attribute10: entity.attribute10,
-      attribute11: entity.attribute11,
-      attribute12: entity.attribute12,
-      attribute13: entity.attribute13,
-      attribute14: entity.attribute14,
-      attribute15: entity.attribute15,
-      lastUpdateDate: entity.lastUpdateDate,
-      lastUpdatedBy: entity.lastUpdatedBy,
-      creationDate: entity.creationDate,
-      createdBy: entity.createdBy,
-      lastUpdateLogin: entity.lastUpdateLogin,
-    };
+      const binds = {
+        physicalInvName: entity.physicalInvName,
+        physicalInvId: entity.physicalInvId,
+        subInventory: entity.subInventory,
+        locators: entity.locators,
+        locatorsId: entity.locatorsId,
+        tagNumber: entity.tagNumber,
+        tagId: entity.tagId,
+        itemCode: entity.itemCode,
+        itemId: entity.itemId,
+        organizationId: entity.organizationId,
+        organizationCode: entity.organizationCode,
+        status: entity.status,
+        uom: entity.uom,
+        lotNumber: entity.lotNumber,
+        lotExpires: entity.lotExpires,
+        currentOnHand: entity.currentOnHand,
+        countQty: entity.countQty,
+        approvedVariance: entity.approvedVariance,
+        onHandVariance: entity.onHandVariance,
+        adjustValue: entity.adjustValue,
+        errorMsg: entity.errorMsg,
+        parentFlag: entity.parentFlag,
+        attributeCategory: entity.attributeCategory,
+        attribute1: entity.attribute1,
+        attribute2: entity.attribute2,
+        attribute3: entity.attribute3,
+        attribute4: entity.attribute4,
+        attribute5: entity.attribute5,
+        attribute6: entity.attribute6,
+        attribute7: entity.attribute7,
+        attribute8: entity.attribute8,
+        attribute9: entity.attribute9,
+        attribute10: entity.attribute10,
+        attribute11: entity.attribute11,
+        attribute12: entity.attribute12,
+        attribute13: entity.attribute13,
+        attribute14: entity.attribute14,
+        attribute15: entity.attribute15,
+        lastUpdateDate: entity.lastUpdateDate,
+        lastUpdatedBy: entity.lastUpdatedBy,
+        creationDate: entity.creationDate,
+        createdBy: entity.createdBy,
+        lastUpdateLogin: entity.lastUpdateLogin,
+      };
 
-    await OracleConnection.executeQuery(sql, binds, { autoCommit: true });
+      await connection.execute(sql, binds, { autoCommit: true });
 
-    // Fetch and return the inserted entity
-    const selectSql = `SELECT * FROM ${this.invCountConfirmTableName} WHERE ITEM_CODE = :itemCode AND ORGANIZATION_CODE = :organizationCode`;
-    const result = await OracleConnection.executeQuery(selectSql, {
-      itemCode: entity.itemCode,
-      organizationCode: entity.organizationCode,
-    });
+      // Fetch and return the inserted entity
+      const selectSql = `SELECT * FROM ${this.invCountConfirmTableName} WHERE ITEM_CODE = :itemCode AND ORGANIZATION_CODE = :organizationCode`;
+      const result = await connection.execute(
+        selectSql,
+        {
+          itemCode: entity.itemCode,
+          organizationCode: entity.organizationCode,
+        },
+        {
+          outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+        }
+      );
 
-    if (!result.rows || result.rows.length === 0) {
-      throw new Error("InvCountConfirm insert failed");
-    }
-    return result.rows[0] as InvCountConfirmEntity;
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("InvCountConfirm insert failed");
+      }
+      return result.rows[0] as InvCountConfirmEntity;
+    }, "insertInvCountConfirm");
   }
 }
 

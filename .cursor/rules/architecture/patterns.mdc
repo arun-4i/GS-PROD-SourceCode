@@ -2,56 +2,93 @@
 description: Architecture strategy for controller, service and repository layers
 alwaysApply: false
 ---
+
 # Architecture Patterns: Repository, Service, Controller
 
 This file defines the core backend architecture patterns for this project. For related standards, see other modular rule files referenced in .cursorrules.
 
 ## Repository Pattern
 
-- Abstracts all database operations
-- No business logic in repositories
-- Expose CRUD and query methods only
-- Example:
+**MANDATORY: Use SSOT Database Wrapper**
+
+All repositories MUST use `withDatabaseConnection()`:
 
 ```ts
-// userRepository.ts
+import { withDatabaseConnection } from "../utils/databaseWrapper";
+import { executeCountQuery } from "../utils/oracleHelpers";
+
 export class UserRepository {
-  async findById(id: number) {
-    /* ... */
+  async findById(id: number): Promise<User | null> {
+    return withDatabaseConnection(async (connection) => {
+      const result = await connection.execute(sql, [id], {
+        outFormat: require("oracledb").OUT_FORMAT_OBJECT,
+      });
+      return (result.rows[0] as User) || null;
+    }, "findById");
   }
-  async create(user: User) {
-    /* ... */
+
+  async getCount(): Promise<number> {
+    return executeCountQuery("users", "active = :active", { active: 1 });
   }
 }
 ```
 
 ## Service Layer
 
-- Contains all business logic
-- Calls repositories for data access
-- Throws errors to controllers
-- Example:
+**MANDATORY: Use SSOT Response Utilities**
+
+All services MUST use centralized response utilities:
 
 ```ts
-// userService.ts
+import {
+  createSuccessResponse,
+  createErrorResponse,
+} from "../validators/common";
+
 export class UserService {
   constructor(private repo: UserRepository) {}
-  async updateUser(id: number, data: UpdateUserDto) {
-    // business logic
-    return this.repo.update(id, data);
+
+  async updateUser(id: number, data: UpdateUserDto): Promise<APIResponse> {
+    try {
+      // business logic
+      const result = await this.repo.update(id, data);
+      return createSuccessResponse(result);
+    } catch (error) {
+      return createErrorResponse(500, "Error updating user", error);
+    }
   }
 }
 ```
 
 ## Controller Layer
 
-- Handles HTTP concerns only (req, res, next)
-- Validates requests, formats responses
-- Calls service methods
-- Example:
+**MANDATORY: Use SSOT Controller Helpers**
+
+All controllers MUST use centralized controller helpers:
 
 ```ts
-// userController.ts
+import {
+  createControllerHandler,
+  createGetHandler,
+  validateArrayBody,
+} from "../utils/controllerHelpers";
+
+export class UserController {
+  // POST endpoint with validation
+  updateUser = createControllerHandler(
+    (body: unknown) => this.userService.updateUser(body as any),
+    (body) => validateArrayBody(body, "users")
+  );
+
+  // GET endpoint
+  getAllUsers = createGetHandler(() => this.userService.getAllUsers());
+}
+```
+
+**Legacy Manual Pattern (DO NOT USE):**
+
+```ts
+// DEPRECATED - Do not use manual try/catch in controllers
 export const updateUser = async (req, res, next) => {
   try {
     const result = await userService.updateUser(req.params.id, req.body);
